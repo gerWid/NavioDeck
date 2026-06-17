@@ -1,0 +1,26 @@
+services:
+  naviodeck:
+    build: .
+    image: naviodeck:latest
+    container_name: naviodeck
+    restart: unless-stopped
+    ports:
+      - "3080:8080"
+    volumes:
+      - ./data:/data
+      # Docker widget via Unix socket: uncomment the line below
+      # - /var/run/docker.sock:/var/run/docker.sock:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - TZ=Europe/Berlin
+      # Secrets (Tankerkönig-Key, Passwort) gehören in ./data/config.yaml
+      # (liegt im gemounteten Volume, nicht im Image — siehe config.yaml.example).
+      # Alternativ können sie hier als Env-Variable gesetzt werden:
+      # - TANKERKOENIG_API_KEY=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+      # - DASHBOARD_PASSWORD=mein-sicheres-passwort
+    #labels:
+    #  - "traefik.enable=true"
+    #  - "traefik.http.routers.naviodeck.rule=Host(`naviodeck.example.com`)"
+    #  - "traefik.http.routers.naviodeck.entrypoints=websecure"
+    #  - "traefik.http.routers.naviodeck.tls.certresolver=letsencrypt"

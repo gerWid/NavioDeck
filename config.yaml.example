@@ -1,0 +1,15 @@
+# Server-Config / Secrets für NavioDeck.
+#
+# Diese Datei nach ./data/config.yaml kopieren und ausfüllen:
+#     cp config.yaml.example data/config.yaml
+#
+# ./data ist das gemountete Volume (docker-compose: ./data:/data).
+# config.yaml liegt damit auf dem Host — NICHT im Image und NICHT im Repo.
+# Änderungen wirken nach einem Container-Neustart (docker compose restart).
+
+# Tankerkönig API-Key für das Fuel-Widget (kostenlos: https://creativecommons.tankerkoenig.de/)
+# Wird serverseitig genutzt, wenn im Widget selbst kein Key eingetragen ist.
+tankerkoenig_api_key: ""
+
+# Optionaler Passwortschutz. Leer = offenes Dashboard (vertrautes Netz).
+dashboard_password: ""
