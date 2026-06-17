@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"net/url"
 	"strings"
 	"sync"
 	"time"
@@ -42,10 +43,13 @@ func init() {
 	dockerCache.entries = make(map[string]dockerCacheEntry)
 }
 
-// ValidateDockerEndpoint returns an error if the endpoint is not in the
-// allowlist of permitted Docker socket paths. Only unix:// sockets pointing to
-// /var/run/docker.sock are permitted. TCP/HTTP endpoints are intentionally
-// rejected to prevent SSRF via the Docker API.
+// ValidateDockerEndpoint returns an error if the endpoint is not a permitted
+// Docker API target. Permitted are the local unix socket
+// (unix:///var/run/docker.sock) and tcp:// / http:// / https:// endpoints that
+// carry an explicit host:port — the latter is meant for a Docker socket proxy
+// (e.g. tcp://192.168.1.211:2375), which is the recommended way to expose the
+// API without bind-mounting the raw socket. Because a tcp/http endpoint can
+// point at an arbitrary host, only configure trusted proxies here.
 func ValidateDockerEndpoint(endpoint string) error {
 	// Default empty string maps to the standard socket and is fine.
 	if endpoint == "" || endpoint == "unix:///var/run/docker.sock" {
@@ -58,7 +62,17 @@ func ValidateDockerEndpoint(endpoint string) error {
 		}
 		return fmt.Errorf("docker endpoint unix socket path %q is not allowed; only /var/run/docker.sock is permitted", path)
 	}
-	return fmt.Errorf("docker endpoint %q is not allowed; only unix:///var/run/docker.sock is permitted", endpoint)
+	if strings.HasPrefix(endpoint, "tcp://") || strings.HasPrefix(endpoint, "http://") || strings.HasPrefix(endpoint, "https://") {
+		u, err := url.Parse(endpoint)
+		if err != nil {
+			return fmt.Errorf("docker endpoint %q is not a valid URL: %w", endpoint, err)
+		}
+		if u.Hostname() == "" || u.Port() == "" {
+			return fmt.Errorf("docker endpoint %q must include an explicit host and port, e.g. tcp://host:2375", endpoint)
+		}
+		return nil
+	}
+	return fmt.Errorf("docker endpoint %q is not allowed; use unix:///var/run/docker.sock or a tcp://host:port socket proxy", endpoint)
 }
 
 func FetchDocker(endpoint string, showAll bool) (*DockerData, error) {

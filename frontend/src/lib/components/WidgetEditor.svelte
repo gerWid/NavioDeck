@@ -761,7 +761,7 @@
 					<label for="docker-endpoint">Docker-Endpunkt</label>
 					<input id="docker-endpoint" type="text" bind:value={widget.config!.endpoint}
 						placeholder="unix:///var/run/docker.sock" />
-					<span class="hint">Unix-Socket: unix:///var/run/docker.sock · Docker Socket Proxy (im Docker-Betrieb): http://host.docker.internal:2375</span>
+					<span class="hint">Unix-Socket: unix:///var/run/docker.sock · Socket-Proxy: tcp://host:2375 oder http://host.docker.internal:2375</span>
 				</div>
 				<div class="form-group">
 					<span class="label-text">Gestoppte Container anzeigen</span>
