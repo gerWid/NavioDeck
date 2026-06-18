@@ -60,6 +60,13 @@
 	onMount(async () => {
 		await tick();
 
+		// gridstack v11+ inserts widget `content` via textContent (XSS-safe) by default,
+		// which would render our container markup as escaped text. We mount Svelte
+		// components into that container ourselves, so restore HTML rendering here.
+		GridStack.renderCB = (el: HTMLElement, w: { content?: string }) => {
+			el.innerHTML = w.content ?? '';
+		};
+
 		grid = GridStack.init(
 			{
 				float: false,

@@ -1,5 +1,5 @@
 # ── Stage 1: Build Frontend ───────────────────────────────────────────────────
-FROM node:22-alpine AS frontend-builder
+FROM node:24-alpine AS frontend-builder
 WORKDIR /app/frontend
 
 COPY frontend/package.json frontend/package-lock.json* ./
@@ -9,7 +9,7 @@ COPY frontend/ ./
 RUN npm run build
 
 # ── Stage 2: Build Backend ────────────────────────────────────────────────────
-FROM golang:1.23-alpine AS backend-builder
+FROM golang:1.26-alpine AS backend-builder
 WORKDIR /app/backend
 
 COPY backend/go.mod ./
@@ -20,7 +20,7 @@ RUN go mod tidy && \
     CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o naviodeck .
 
 # ── Stage 3: Final Image ──────────────────────────────────────────────────────
-FROM alpine:3.20
+FROM alpine:3.22
 RUN apk --no-cache add ca-certificates tzdata su-exec
 
 WORKDIR /app
